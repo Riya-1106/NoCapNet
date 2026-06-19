@@ -1,0 +1,39 @@
+{
+  "name": "@nocapnet/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1072.0",
+    "@aws-sdk/s3-request-presigner": "^3.1072.0",
+    "@fastify/cors": "^11.2.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/jwt": "^10.1.0",
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/sensible": "^6.0.4",
+    "@fastify/websocket": "^11.2.0",
+    "@nocapnet/shared": "file:../../packages/shared",
+    "@prisma/client": "^5.22.0",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.8.5",
+    "google-auth-library": "^10.7.0",
+    "nanoid": "^5.0.9",
+    "prisma": "^5.22.0",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "eslint": "^9.29.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "nocapnet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NoCapNet - privacy-first GenZ social chat app for iOS and Android.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace apps/api run dev",
+    "dev:mobile": "npm --workspace apps/mobile run start",
+    "build:api": "npm --workspace apps/api run build",
+    "build:android:preview": "npm --workspace apps/mobile run build:android:preview",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}

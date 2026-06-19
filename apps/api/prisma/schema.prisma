@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(uuid())
+  displayName     String
+  handle          String           @unique
+  phoneHash       String?          @unique
+  emailHash       String?          @unique
+  avatarObjectKey String?
+  friendCode      String           @unique
+  appLockEnabled  Boolean          @default(false)
+  disguiseMode    DisguiseMode     @default(NOCAPNET)
+  lastSeenAt      DateTime?
+  onlineStatus    OnlineStatus     @default(OFFLINE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  devices         Device[]
+  sentRequests    FriendRequest[]  @relation("friend_request_sender")
+  receivedRequests FriendRequest[] @relation("friend_request_receiver")
+  friendshipsA    Friendship[]      @relation("friendship_user_a")
+  friendshipsB    Friendship[]      @relation("friendship_user_b")
+  conversations   ConversationParticipant[]
+  liveLocations   LiveLocationShare[]
+}
+
+model Otp {
+  id              String   @id @default(uuid())
+  destinationHash String
+  channel         AuthChannel
+  codeHash        String
+  attempts        Int      @default(0)
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  @@unique([destinationHash, channel])
+  @@index([expiresAt])
+}
+
+model Device {
+  id                String             @id @default(uuid())
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pushToken         String?
+  platform          String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  publicIdentityKey PublicIdentityKey?
+  signedPreKey      SignedPreKey?
+  oneTimePreKeys    OneTimePreKey[]
+}
+
+model PublicIdentityKey {
+  id               String   @id @default(uuid())
+  deviceId         String   @unique
+  device           Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  publicKey        String
+  signingPublicKey String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model SignedPreKey {
+  id        String   @id @default(uuid())
+  deviceId  String   @unique
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  keyId     String
+  publicKey String
+  signature String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OneTimePreKey {
+  id          String    @id @default(uuid())
+  deviceId    String
+  device      Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  keyId       String
+  publicKey   String
+  claimedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([deviceId, keyId])
+  @@index([deviceId, claimedAt])
+}
+
+model Conversation {
+  id           String                    @id @default(uuid())
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  participants ConversationParticipant[]
+  messages     Message[]
+  liveLocations LiveLocationShare[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid())
+  conversationId String
+  userId         String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt       DateTime     @default(now())
+  lastReadAt     DateTime?
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderUserId    String
+  kind           MessageKind
+  envelope       Json
+  mediaObjectKey String?
+  expiresAt      DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model Friendship {
+  id        String   @id @default(uuid())
+  userAId   String
+  userBId   String
+  userA     User     @relation("friendship_user_a", fields: [userAId], references: [id], onDelete: Cascade)
+  userB     User     @relation("friendship_user_b", fields: [userBId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userAId, userBId])
+  @@index([userBId])
+}
+
+model LiveLocationShare {
+  id             String       @id @default(uuid())
+  userId         String
+  conversationId String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  encryptedPayload Json
+  expiresAt      DateTime
+  stoppedAt      DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, expiresAt])
+  @@index([userId, stoppedAt])
+}
+
+model FriendRequest {
+  id         String              @id @default(uuid())
+  senderId   String
+  receiverId String
+  sender     User                @relation("friend_request_sender", fields: [senderId], references: [id])
+  receiver   User                @relation("friend_request_receiver", fields: [receiverId], references: [id])
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+}
+
+enum AuthChannel {
+  phone
+  email
+}
+
+enum OnlineStatus {
+  ONLINE
+  OFFLINE
+  HIDDEN
+}
+
+enum MessageKind {
+  text
+  image
+  video
+  audio
+  static_location
+  live_location
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  BLOCKED
+}
+
+enum DisguiseMode {
+  NOCAPNET
+  CAMERA
+  NOTES
+}

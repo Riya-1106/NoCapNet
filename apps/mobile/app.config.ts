@@ -57,7 +57,10 @@ const config: ExpoConfig = {
   ],
   extra: {
     apiUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:4000",
-    googleClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? ""
+    googleClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "",
+    eas: {
+      projectId: "90a11d90-335f-464f-a345-89a245c7d608"
+    }
   }
 };
 

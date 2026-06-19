@@ -17,7 +17,7 @@
       },
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.nocapnet.example"
+        "EXPO_PUBLIC_API_URL": "https://nocapnet-api.onrender.com"
       }
     },
     "production": {

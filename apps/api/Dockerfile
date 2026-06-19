@@ -1,4 +1,5 @@
 FROM node:22-alpine AS deps
+RUN apk add --no-cache openssl
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/package.json
@@ -12,6 +13,7 @@ RUN npm --workspace apps/api run prisma:generate
 RUN npm --workspace apps/api run build
 
 FROM node:22-alpine AS runtime
+RUN apk add --no-cache openssl
 ENV NODE_ENV=production
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.base.json ./
